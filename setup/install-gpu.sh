@@ -7,27 +7,29 @@ sudo apt-get --assume-yes install tmux build-essential gcc g++ make binutils
 sudo apt-get --assume-yes install software-properties-common
 
 # download and install GPU drivers
+# this is untested in 2018/01, I had the nvidia repo already
 wget "http://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_8.0.44-1_amd64.deb" -O "cuda-repo-ubuntu1604_8.0.44-1_amd64.deb"
 
 sudo dpkg -i cuda-repo-ubuntu1604_8.0.44-1_amd64.deb
 sudo apt-get update
-sudo apt-get -y install cuda
+sudo apt-get -y install cuda-8-0
 sudo modprobe nvidia
 nvidia-smi
 
 # install Anaconda for current user
 mkdir downloads
 cd downloads
-wget "https://repo.continuum.io/archive/Anaconda2-4.2.0-Linux-x86_64.sh" -O "Anaconda2-4.2.0-Linux-x86_64.sh"
-bash "Anaconda2-4.2.0-Linux-x86_64.sh" -b
+wget "https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh" -O "Miniconda3-Linux-x86_64.sh"
+bash "Miniconda3-Linux-x86_64.sh" -b
 
-echo "export PATH=\"$HOME/anaconda2/bin:\$PATH\"" >> ~/.bashrc
-export PATH="$HOME/anaconda2/bin:$PATH"
-conda install -y bcolz
+echo "export PATH=\"$HOME/miniconda3/bin:\$PATH\"" >> ~/.bashrc
+echo "export MKL_THREADING_LAYER=GNU" >> ~/.bashrc
+export PATH="$HOME/miniconda3/bin:$PATH"
+conda install -y bcolz jupyter h5py matplotlib mkl pillow scikit-learn
 conda upgrade -y --all
 
 # install and configure theano
-pip install theano
+pip install theano==0.9.0
 echo "[global]
 device = gpu
 floatX = float32
@@ -54,8 +56,6 @@ sudo cp include/* /usr/local/cuda/include/
 
 # configure jupyter and prompt for password
 jupyter notebook --generate-config
-jupass=`python -c "from notebook.auth import passwd; print(passwd())"`
-echo "c.NotebookApp.password = u'"$jupass"'" >> $HOME/.jupyter/jupyter_notebook_config.py
 echo "c.NotebookApp.ip = '*'
 c.NotebookApp.open_browser = False" >> $HOME/.jupyter/jupyter_notebook_config.py
 
